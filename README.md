@@ -31,13 +31,52 @@ Replicación activa con modelo push
 C++ (C++17)
 #Librerías y paquetes
 
-Crow (v1.0+1)
+Crow (v1.0+1) - Para implementar la API REST que comunica a los clientes con el Middleware MOM, se utilizó Crow, un microframework web en C++ ligero, moderno y eficiente, ideal para exponer endpoints RESTful desde un servidor C++. El cliente frontend (carpeta revistas-app/) se conecta a esta API para interactuar con los tópicos y colas.
 
 SQLite3
 
 Boost
 
 CMake
+
+# Requisitos por sistema operativo
+🔵 macOS (Apple Silicon o Intel)
+
+brew install sqlite3 boost cmake
+curl -L https://github.com/CrowCpp/Crow/releases/download/v1.0%2B1/crow_all.h -o crow_all.h
+
+Compilación:
+
+clang++ mom1_server.cpp -o mom1_server \
+  -I/usr/local/include -L/usr/local/lib \
+  -lsqlite3 -lboost_system -lpthread
+Si se usa Apple Silicon, puede que se necesite reemplazar /usr/local por /opt/homebrew.
+
+🟢 Linux (Ubuntu / Debian / WSL)
+
+sudo apt update
+sudo apt install build-essential libsqlite3-dev libboost-system-dev cmake curl
+curl -L https://github.com/CrowCpp/Crow/releases/download/v1.0%2B1/crow_all.h -o crow_all.h
+
+Compilación:
+
+g++ mom1_server.cpp -o mom1_server \
+  -lsqlite3 -lboost_system -lpthread
+  
+🟠 Windows (con WSL o MinGW)
+
+Instala WSL + Ubuntu (recomendado)
+o usa MSYS2 / MinGW + Boost precompilado
+
+En WSL:
+
+sudo apt install build-essential libsqlite3-dev libboost-system-dev cmake curl
+curl -L https://github.com/CrowCpp/Crow/releases/download/v1.0%2B1/crow_all.h -o crow_all.h
+g++ mom1_server.cpp -o mom1_server -lsqlite3 -lboost_system -lpthread
+
+En MSYS2:
+pacman -S mingw-w64-x86_64-boost mingw-w64-x86_64-sqlite3
+g++ mom1_server.cpp -o mom1_server -lsqlite3 -lboost_system -lws2_32 -lshlwapi
 
 ## como se compila y ejecuta.
 ## detalles del desarrollo.
