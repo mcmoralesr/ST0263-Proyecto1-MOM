@@ -71,7 +71,7 @@
 }
 
 .select-container {
-  max-height: 150px;  /* Máxima altura para el selector */
+  max-height: 100px !important;  /* Máxima altura para el selector */
   overflow-y: auto;   /* Activar desplazamiento vertical */
 }
 
@@ -81,4 +81,8 @@
 
 .input-box{
   margin-right: 5px;
+}
+
+.relative{
+  max-height: 100px !important;
 }
