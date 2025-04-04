@@ -6,7 +6,7 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/" element={<Login />} />
-                <Route path="/revistasss" element={<Magazines />} />
+                <Route path="/revistass" element={<Magazines />} />
             </Routes>
         </Router>
     );
