@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 
-function Magazines({ sendMagazineArray, sendSingleMagazine }) {
+function Magazines({ sendMagazineArray }) {
     const [selectedMagazines, setSelectedMagazines] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [magazineName, setMagazineName] = useState("");
+    const [mensajesTopico, setMensajesTopico] = useState([]);
     const dropdownRef = useRef(null);
 
-    const magazines = [
-        "Revista A", "Revista B", "Revista C", "Revista D",
-        "Revista E", "Revista F", "Revista G", "Revista H"
-    ];
+    const [magazines, setMagazines] = useState([]);
+    const [misTopicos, setMisTopicos] = useState([]);
 
-    // Manejar clic fuera del dropdown para cerrarlo
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -22,7 +20,56 @@ function Magazines({ sendMagazineArray, sendSingleMagazine }) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+    const fetchMagazines = async () => {
+        if (magazines.length > 0) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("http://localhost:5000/api/topicos", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Error al obtener las revistas");
+            }
+
+            const data = await response.json();
+            setMagazines(data.topicos);
+        } catch (error) {
+            console.error("Error al cargar revistas:", error);
+        }
+    };
+
+    const fetchMisTopicos = async () => {
+        if (misTopicos.length > 0) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("http://localhost:5000/api/mis-topicos", {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Error al obtener mis tópicos");
+            }
+
+            const data = await response.json();
+            setMisTopicos(data.topicos); // Asegúrate que la respuesta tenga 'topicos'
+        } catch (error) {
+            console.error("Error al cargar mis tópicos:", error);
+        }
+    };
+
+    const toggleDropdown = async () => {
+        setDropdownOpen(!dropdownOpen);
+        if (magazines.length === 0) {
+            await fetchMagazines();
+        }
+    };
 
     const handleSelectMagazine = (magazine) => {
         setSelectedMagazines((prev) =>
@@ -30,12 +77,67 @@ function Magazines({ sendMagazineArray, sendSingleMagazine }) {
         );
     };
 
+    const handleSendToBackend = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const response = await fetch("http://localhost:5000/api/usuario-topicos", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ revistas: selectedMagazines })
+            });
+
+            if (response.ok) {
+                alert("Revistas añadidas correctamente");
+                sendMagazineArray(selectedMagazines);
+                setSelectedMagazines([]);
+                setDropdownOpen(false);
+            } else {
+                const error = await response.json();
+                alert(error.message || "Error al enviar revistas");
+            }
+        } catch (err) {
+            console.error("Error al enviar revistas:", err);
+        }
+    };
+
+    const sendSingleMagazine = async (nombreTopico) => {
+        if (!nombreTopico) {
+            alert("Selecciona una revista");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const response = await fetch(`http://localhost:5000/api/topicos/${nombreTopico}/mensajes`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+                setMensajesTopico(data.mensajes);
+            } else if (response.status === 404) {
+                alert("Tópico no encontrado");
+            } else {
+                alert("Error al obtener la revista");
+            }
+        } catch (error) {
+            console.error("Error en la petición:", error);
+        }
+    };
+
     return (
         <div className="container py-5 max-w-md mx-auto">
             <div className="card shadow-lg rounded-lg p-4">
                 <h2 className="text-center mb-4 text-lg font-bold">Selector de Revistas</h2>
 
-                {/* Input tipo selector */}
+                {/* Selector múltiple */}
                 <div className="relative" ref={dropdownRef}>
                     <div
                         className="border rounded-lg p-2 cursor-pointer flex flex-wrap gap-1 bg-white"
@@ -53,34 +155,29 @@ function Magazines({ sendMagazineArray, sendSingleMagazine }) {
                     </div>
 
                     {dropdownOpen && (
-                    <div className="selector-container bg-white border rounded-lg overflow-y-auto shadow-md z-10">
-                        {magazines.map((mag, index) => (
-                            <div
-                                key={index}
-                                onClick={() => handleSelectMagazine(mag)}
-                                className={`p-2 cursor-pointer flex items-center hover:bg-gray-200 ${
-                                    selectedMagazines.includes(mag) ? "bg-blue-100" : ""
-                                }`}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={selectedMagazines.includes(mag)}
-                                    className="input-box"
-                                    readOnly
-                                />
-                                {mag}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-
-
+                        <div className="selector-container bg-white border rounded-lg overflow-y-auto shadow-md z-10">
+                            {magazines.map((mag, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => handleSelectMagazine(mag)}
+                                    className={`p-2 cursor-pointer flex items-center hover:bg-gray-200 ${selectedMagazines.includes(mag) ? "bg-blue-100" : ""}`}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedMagazines.includes(mag)}
+                                        className="input-box"
+                                        readOnly
+                                    />
+                                    {mag}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <button
+                <button 
                     className="btn btn-primary w-full mt-4 bg-blue-400 text-white p-2 rounded-md"
-                    onClick={() => sendMagazineArray(selectedMagazines)}
+                    onClick={handleSendToBackend}
                 >
                     Añadir
                 </button>
@@ -90,10 +187,11 @@ function Magazines({ sendMagazineArray, sendSingleMagazine }) {
                     <label className="form-label">Selecciona una revista:</label>
                     <select
                         className="form-select w-full p-2 border rounded-lg mt-2"
+                        onClick={fetchMisTopicos}
                         onChange={(e) => setMagazineName(e.target.value)}
                     >
                         <option value="">Seleccione una revista</option>
-                        {magazines.map((mag, index) => (
+                        {misTopicos.map((mag, index) => (
                             <option key={index} value={mag}>{mag}</option>
                         ))}
                     </select>
@@ -105,6 +203,22 @@ function Magazines({ sendMagazineArray, sendSingleMagazine }) {
                 >
                     Ver Revista
                 </button>
+
+                {/* Mostrar mensajes de la revista seleccionada */}
+                {mensajesTopico.length > 0 && (
+                    <div className="mt-6">
+                        <h2 className="text-xl font-semibold mb-2">Mensajes de la revista:</h2>
+                        <ul className="space-y-2">
+                            {mensajesTopico.map((msg) => (
+                                <li key={msg.id} className="border p-3 rounded-md shadow-sm">
+                                    <p><strong>Emisor:</strong> {msg.emisor}</p>
+                                    <p><strong>Contenido:</strong> {msg.contenido}</p>
+                                    <p className="text-sm text-gray-500"><strong>Fecha:</strong> {new Date(msg.timestamp).toLocaleString()}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );
