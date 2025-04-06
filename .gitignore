@@ -1,7 +1,7 @@
+venv/
 __pycache__/
 *.pyc
-*.db
-.env
-venv/
-.idea/
+*.pyo
+*.pyd
 .DS_Store
+
