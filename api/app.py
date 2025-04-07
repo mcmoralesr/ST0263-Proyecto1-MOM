@@ -3,10 +3,19 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 import bcrypt
 import uuid
 from datetime import datetime, timedelta
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app, origins=["http://34.201.237.162"], supports_credentials=True)
 app.config['JWT_SECRET_KEY'] = 'clave-secreta-del-proyecto'  # En producción usar variable de entorno
 jwt = JWTManager(app)
+
+CORS(app, 
+     resources={r"/api/*": {"origins": "http://34.201.237.162"}},
+     supports_credentials=True,
+     allow_headers="*",
+     methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"]
+)
 
 usuarios = {}
 topicos = {}
@@ -35,7 +44,11 @@ def register():
     
     # Hash de la contraseña para almacenamiento seguro
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    usuarios[username] = {'password': hashed_password, 'topicos_creados': [], 'colas_creadas': []}
+    usuarios[username] = {'password': hashed_password, 
+                          'topicos_creados': [], 
+                          'colas_creadas': [],
+                          'topicos_suscritos': []
+                          }
     
     return jsonify({"message": "Usuario registrado exitosamente"}), 201
 
@@ -55,6 +68,37 @@ def login():
         return jsonify({"token": access_token}), 200
     
     return jsonify({"error": "Credenciales inválidas"}), 401
+
+# Endpoint para suscribirse a un tópico
+@app.route('/api/topicos/<nombre_topico>/suscribir', methods=['POST'])
+@jwt_required()
+def suscribir_topico(nombre_topico):
+    current_user = get_jwt_identity()
+
+    if nombre_topico not in topicos:
+        return jsonify({"error": "Tópico no encontrado"}), 404
+    
+    if nombre_topico in usuarios[current_user]['topicos_suscritos']:
+        return jsonify({"error": "Ya estás suscrito a este tópico"}), 409
+    
+    usuarios[current_user]['topicos_suscritos'].append(nombre_topico)
+    return jsonify({"mensaje": f"Suscrito al tópico '{nombre_topico}' exitosamente"}), 200
+
+@app.route('/api/topicos/<nombre_topico>/desuscribir', methods=['POST'])
+@jwt_required()
+def desuscribir_topico(nombre_topico):
+    current_user = get_jwt_identity()
+
+    if nombre_topico not in topicos:
+        return jsonify({"error": "Tópico no encontrado"}), 404
+    
+    if nombre_topico not in usuarios[current_user]['topicos_suscritos']:
+        return jsonify({"error": "No estás suscrito a este tópico"}), 409
+    
+    usuarios[current_user]['topicos_suscritos'].remove(nombre_topico)
+    return jsonify({"mensaje": f"Desuscrito del tópico '{nombre_topico}' exitosamente"}), 200
+
+
 
 # Endpoints de gestión de tópicos
 @app.route('/api/topicos', methods=['GET'])
@@ -106,6 +150,57 @@ def borrar_topico(nombre_topico):
     usuarios[current_user]['topicos_creados'].remove(nombre_topico)
     
     return jsonify({"mensaje": f"Tópico '{nombre_topico}' eliminado exitosamente"}), 200
+
+# Endpoints para las colas
+@app.route('/api/colas', methods=['GET'])
+@jwt_required()
+def listar_colas():
+    return jsonify({"colas": list(colas.keys())}), 200
+
+@app.route('/api/colas', methods=['POST'])
+@jwt_required()
+def crear_cola():
+    data = request.json
+    nombre_cola = data.get('nombre')
+    current_user = get_jwt_identity()
+    
+    if not nombre_cola:
+        return jsonify({"error": "Nombre de la cola es obligatorio"}), 400
+    
+    if nombre_cola in colas:
+        return jsonify({"error": "La cola ya existe"}), 409
+    
+    cola_id = str(uuid.uuid4())
+    colas[nombre_cola] = {
+        'id': cola_id,
+        'creador': current_user,
+        'fecha_creacion': datetime.now().isoformat()
+    }
+    usuarios[current_user]['colas_creadas'].append(nombre_cola)
+    mensajes_colas[nombre_cola] = []
+    
+    return jsonify({
+        "mensaje": f"Cola '{nombre_cola}' creada exitosamente",
+        "cola_id": cola_id
+    }), 201
+
+@app.route('/api/colas/<nombre_cola>', methods=['DELETE'])
+@jwt_required()
+def borrar_cola(nombre_cola):
+    current_user = get_jwt_identity()
+    
+    if nombre_cola not in colas:
+        return jsonify({"error": "Cola no encontrada"}), 404
+    
+    if colas[nombre_cola]['creador'] != current_user:
+        return jsonify({"error": "No tienes permiso para borrar esta cola"}), 403
+    
+    del colas[nombre_cola]
+    if nombre_cola in mensajes_colas:
+        del mensajes_colas[nombre_cola]
+    usuarios[current_user]['colas_creadas'].remove(nombre_cola)
+    
+    return jsonify({"mensaje": f"Cola '{nombre_cola}' eliminada exitosamente"}), 200
 
 # Endpoints para envío y recepción de mensajes
 @app.route('/api/topicos/<nombre_topico>/mensajes', methods=['POST'])
