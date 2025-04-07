@@ -8,7 +8,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://44.221.193.221:5000//api/auth/login', {
+            const response = await fetch('http://44.221.193.221:5000//api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -16,9 +16,11 @@ function Login() {
                 body: JSON.stringify({ username, password })
             });
 
+
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
+                console.log('Token guardado:', data.token)
                 setError('');
                 alert('Inicio de sesión exitoso');
                 // Aquí puedes redirigir o cargar otra vista
