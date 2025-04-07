@@ -6,9 +6,37 @@ function Login() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleLogin = async () => {
+    const handleRegister = async () => {
         try {
             const response = await fetch('http://44.221.193.221:5000//api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                console.log('Token guardado:', data.token)
+                setError('');
+                alert('Inicio de sesión exitoso');
+                // Aquí puedes redirigir o cargar otra vista
+            } else {
+                const errData = await response.json();
+                setError(errData.error || 'Error en el inicio de sesión');
+            }
+        } catch (err) {
+            console.error('Error al conectar con la API:', err);
+            setError('No se pudo conectar con el servidor');
+        }
+    };
+
+    const handleLogin = async () => {
+        try {
+            const response = await fetch('http://44.221.193.221:5000//api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,11 +90,17 @@ function Login() {
             </div>
 
             {error && <div className="alert alert-danger">{error}</div>}
+            <div className="mb-3">
+                <button className="btn btn-primary w-100 mb-2" onClick={handleRegister}>
+                    Registrar
+                </button>
+
+                <button className="btn btn-primary w-100" onClick={handleLogin}>
+                    Login
+                </button>
+            </div>
 
 
-            <button className="btn btn-primary w-100" onClick={handleLogin}>
-                Ingresar
-            </button>
         </div>
     );
 }
