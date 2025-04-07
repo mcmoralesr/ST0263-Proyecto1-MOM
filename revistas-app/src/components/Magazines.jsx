@@ -25,7 +25,7 @@ function Magazines({ sendMagazineArray }) {
 
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:5000/api/topicos", {
+            const response = await fetch("http://44.221.193.221:5000//api/topicos", {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -47,7 +47,7 @@ function Magazines({ sendMagazineArray }) {
 
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:5000/api/mis-topicos", {
+            const response = await fetch("http://44.221.193.221:5000//api/mis-topicos", {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -80,7 +80,7 @@ function Magazines({ sendMagazineArray }) {
     const handleSendToBackend = async () => {
         const token = localStorage.getItem("token");
         try {
-            const response = await fetch("http://localhost:5000/api/usuario-topicos", {
+            const response = await fetch("http://44.221.193.221:5000//api/usuario-topicos", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -112,7 +112,7 @@ function Magazines({ sendMagazineArray }) {
         try {
             const token = localStorage.getItem("token");
 
-            const response = await fetch(`http://localhost:5000/api/topicos/${nombreTopico}/mensajes`, {
+            const response = await fetch(`http://44.221.193.221:5000//api/topicos/${nombreTopico}/mensajes`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
