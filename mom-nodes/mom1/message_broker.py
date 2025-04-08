@@ -1,51 +1,71 @@
-# mom1/message_broker.py
-
-from typing import Dict, List, Optional
-from collections import defaultdict
-
+from datetime import datetime
 
 class MessageBroker:
     def __init__(self):
-        self.queues: Dict[str, List[str]] = defaultdict(list)
-        self.queue_subscribers: Dict[str, bool] = defaultdict(bool)
+        self.topics = {}
+        self.topic_owners = {}
+        self.topic_messages = {}
 
-        self.topics: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
-        self.topic_subscribers: Dict[str, List[str]] = defaultdict(list)
+        self.queues = {}
+        self.queue_owners = {}
+        self.queue_messages = {}
 
-    # === QUEUES (solo un consumidor por mensaje) ===
+    def create_topic(self, name, owner=None, description=None):
+        self.topics[name] = {"name": name, "owner": owner or "simulado", "description": description}
+        self.topic_owners[name] = owner or "simulado"
+        self.topic_messages[name] = []
 
-    def publish_to_queue(self, queue_name: str, message: str):
-        self.queues[queue_name].append(message)
+    def delete_topic(self, name):
+        self.topics.pop(name, None)
+        self.topic_owners.pop(name, None)
+        self.topic_messages.pop(name, None)
 
-    def subscribe_to_queue(self, queue_name: str):
-        self.queue_subscribers[queue_name] = True
+    def topic_exists(self, name):
+        return name in self.topics
 
-    def consume_from_queue(self, queue_name: str) -> Optional[str]:
-        if not self.queues[queue_name]:
-            return None
-        return self.queues[queue_name].pop(0)
+    def can_user_modify_topic(self, name, user):
+        return self.topic_owners.get(name) == user
 
-    # === TOPICS (broadcast con clave) ===
+    def publish_to_topic(self, name, message, user):
+        self.topic_messages[name].append({
+            "contenido": message,
+            "emisor": user,
+            "timestamp": datetime.now().isoformat()
+        })
 
-    def publish_to_topic(self, topic_name: str, message: str):
-        for key in self.topics[topic_name]:
-            self.topics[topic_name][key].append(message)
+    def get_messages_from_topic(self, name):
+        return self.topic_messages.get(name, [])
 
-    def subscribe_to_topic(self, topic_name: str, key: str):
-        if key not in self.topics[topic_name]:
-            self.topics[topic_name][key] = []
+    def create_queue(self, name, owner=None, description=None):
+        self.queues[name] = {"name": name, "owner": owner or "simulado", "description": description}
+        self.queue_owners[name] = owner or "simulado"
+        self.queue_messages[name] = []
 
-    def get_topic_messages(self, topic_name: str, key: str) -> List[str]:
-        return self.topics[topic_name].get(key, [])
+    def delete_queue(self, name):
+        self.queues.pop(name, None)
+        self.queue_owners.pop(name, None)
+        self.queue_messages.pop(name, None)
 
-    # === INFO ===
+    def queue_exists(self, name):
+        return name in self.queues
 
-    def list_queues(self) -> List[str]:
-        return list(self.queues.keys())
+    def can_user_modify_queue(self, name, user):
+        return self.queue_owners.get(name) == user
 
-    def list_topics(self) -> List[str]:
-        return list(self.topics.keys())
+    def send_to_queue(self, name, message, user):
+        self.queue_messages[name].append({
+            "contenido": message,
+            "emisor": user,
+            "timestamp": datetime.now().isoformat(),
+            "entregado": False
+        })
 
+    def consume_from_queue(self, name):
+        cola = self.queue_messages.get(name, [])
+        for m in cola:
+            if not m["entregado"]:
+                m["entregado"] = True
+                return m
+        return None
 
-# Singleton instance
 broker = MessageBroker()

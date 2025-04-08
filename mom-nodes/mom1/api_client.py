@@ -2,20 +2,19 @@
 
 import requests
 import os
-import json
 
 API_URL = "http://localhost:5000"
 TOKEN_PATH = os.path.join(os.path.dirname(__file__), ".token")
 
 def login_user(username: str, password: str):
-    response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
+    response = requests.post(f"{API_URL}/api/auth/login", json={"username": username, "password": password})
     if response.status_code == 200:
-        token = response.json().get("access_token")
+        token = response.json().get("token")
         save_token(token)
-        print("Token guardado.")
+        print("✅ Token guardado.")
         return token
     else:
-        print("Error de login:", response.json())
+        print("❌ Error de login:", response.json())
         return None
 
 def save_token(token: str):
