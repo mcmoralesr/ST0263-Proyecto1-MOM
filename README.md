@@ -35,6 +35,8 @@ _(A completar al final del proyecto si queda algo pendiente)_
 - Replicación activa entre nodos.
 - Simulación de colas/tópicos como estructuras `dict` compartibles.
 
+![image](https://github.com/user-attachments/assets/5be7ef5d-d4e6-4f42-8d4f-2232875d58cd)
+
 ---
 
 ### 3. Ambiente de Desarrollo
