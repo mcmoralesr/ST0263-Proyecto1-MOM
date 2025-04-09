@@ -1,18 +1,14 @@
-# mom-nodes/mom1/mom1_server.py
-
-from fastapi import FastAPI, HTTPException, Header
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from jose import jwt, JWTError
+from jose import JWTError, jwt
 from datetime import datetime
-from message_broker import broker
-from data_simulation import simulate_data
-
-SECRET_KEY = "clave-secreta-del-proyecto"
-ALGORITHM = "HS256"
+from mom_nodes.mom1.message_broker import broker
+from mom_nodes.mom1.grpc_client import replicator
 
 app = FastAPI()
 
+# CORS para permitir conexiones desde cualquier origen (ajustar si es necesario)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -21,119 +17,105 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-def startup_event():
-    simulate_data()
+# === CONFIG ===
+SECRET_KEY = "clave-secreta-del-proyecto"
+ALGORITHM = "HS256"
 
-def decode_jwt_token(token: str) -> Optional[str]:
+# === UTILS ===
+
+def get_username_from_token(auth: Optional[str]) -> str:
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(status_code=403, detail="Token inválido")
+    token = auth[7:]
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         return payload.get("sub")
     except JWTError:
-        return None
-
-def get_user_from_auth(authorization: str) -> str:
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=403, detail="Formato de token inválido")
-    token = authorization[7:]
-    user = decode_jwt_token(token)
-    if user is None:
-        raise HTTPException(status_code=401, detail="Token inválido")
-    return user
+        raise HTTPException(status_code=403, detail="Token inválido")
 
 # === TOPICOS ===
 
 @app.get("/topicos")
-def listar_topicos(authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    return {"usuario": user, "topicos": list(broker.topics.keys())}
+def listar_topicos(authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
+    return {"topicos": list(broker.topicos.keys())}
 
 @app.post("/topicos")
-def crear_topico(data: dict, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
+def crear_topico(data: dict, authorization: Optional[str] = Header(None)):
+    usuario = get_username_from_token(authorization)
     nombre = data.get("nombre")
     if not nombre:
-        raise HTTPException(status_code=400, detail="Nombre del tópico requerido")
-    if nombre in broker.topics:
-        raise HTTPException(status_code=409, detail="Tópico ya existe")
-    broker.create_topic(nombre, owner=user)
-    return {"mensaje": f"Tópico '{nombre}' creado por {user}"}
+        raise HTTPException(status_code=400, detail="Falta nombre")
+    broker.create_topic(nombre, description=f"Tópico de {usuario}")
+    replicator.replicate_create_topic(nombre, description=f"Replicado de {usuario}")
+    return {"mensaje": f"Tópico '{nombre}' creado por {usuario}"}
 
 @app.delete("/topicos/{nombre}")
-def eliminar_topico(nombre: str, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    if not broker.topic_exists(nombre):
-        raise HTTPException(status_code=404, detail="Tópico no encontrado")
-    if not broker.can_user_modify_topic(nombre, user):
-        raise HTTPException(status_code=403, detail="No autorizado")
+def eliminar_topico(nombre: str, authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
     broker.delete_topic(nombre)
-    return {"mensaje": f"Tópico '{nombre}' eliminado por {user}"}
+    return {"mensaje": f"Tópico '{nombre}' eliminado"}
 
 @app.post("/topicos/{nombre}/publicar")
-def publicar_en_topico(nombre: str, data: dict, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
+def publicar_topico(nombre: str, data: dict, authorization: Optional[str] = Header(None)):
+    usuario = get_username_from_token(authorization)
     mensaje = data.get("mensaje")
     if not mensaje:
-        raise HTTPException(status_code=400, detail="Mensaje vacío")
-    if not broker.topic_exists(nombre):
-        raise HTTPException(status_code=404, detail="Tópico no encontrado")
-    broker.publish_to_topic(nombre, mensaje, user)
+        raise HTTPException(status_code=400, detail="Falta mensaje")
+    broker.publish_to_topic(nombre, mensaje, emisor=usuario)
+    replicator.replicate_publish_to_topic(nombre, mensaje)
     return {"mensaje": "Mensaje publicado exitosamente"}
 
 @app.get("/topicos/{nombre}/mensajes")
-def recibir_mensajes(nombre: str, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    if not broker.topic_exists(nombre):
-        raise HTTPException(status_code=404, detail="Tópico no encontrado")
+def recibir_topico(nombre: str, authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
     mensajes = broker.get_messages_from_topic(nombre)
     return {"topico": nombre, "mensajes": mensajes}
 
 # === COLAS ===
 
 @app.get("/colas")
-def listar_colas(authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    return {"usuario": user, "colas": list(broker.queues.keys())}
+def listar_colas(authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
+    return {"colas": list(broker.colas.keys())}
 
 @app.post("/colas")
-def crear_cola(data: dict, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
+def crear_cola(data: dict, authorization: Optional[str] = Header(None)):
+    usuario = get_username_from_token(authorization)
     nombre = data.get("nombre")
     if not nombre:
-        raise HTTPException(status_code=400, detail="Nombre de cola requerido")
-    if nombre in broker.queues:
-        raise HTTPException(status_code=409, detail="Cola ya existe")
-    broker.create_queue(nombre, owner=user)
-    return {"mensaje": f"Cola '{nombre}' creada por {user}"}
+        raise HTTPException(status_code=400, detail="Falta nombre")
+    broker.create_queue(nombre, description=f"Cola de {usuario}")
+    replicator.replicate_create_queue(nombre, description=f"Replicado de {usuario}")
+    return {"mensaje": f"Cola '{nombre}' creada por {usuario}"}
 
 @app.delete("/colas/{nombre}")
-def eliminar_cola(nombre: str, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    if not broker.queue_exists(nombre):
-        raise HTTPException(status_code=404, detail="Cola no encontrada")
-    if not broker.can_user_modify_queue(nombre, user):
-        raise HTTPException(status_code=403, detail="No autorizado")
+def eliminar_cola(nombre: str, authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
     broker.delete_queue(nombre)
-    return {"mensaje": f"Cola '{nombre}' eliminada por {user}"}
+    return {"mensaje": f"Cola '{nombre}' eliminada"}
 
 @app.post("/colas/{nombre}/enviar")
-def enviar_a_cola(nombre: str, data: dict, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
+def enviar_cola(nombre: str, data: dict, authorization: Optional[str] = Header(None)):
+    usuario = get_username_from_token(authorization)
     mensaje = data.get("mensaje")
     if not mensaje:
-        raise HTTPException(status_code=400, detail="Mensaje vacío")
-    if not broker.queue_exists(nombre):
-        raise HTTPException(status_code=404, detail="Cola no encontrada")
-    broker.send_to_queue(nombre, mensaje, user)
+        raise HTTPException(status_code=400, detail="Falta mensaje")
+    broker.publish_to_queue(nombre, mensaje, emisor=usuario)
+    replicator.replicate_publish_to_queue(nombre, mensaje)
     return {"mensaje": "Mensaje enviado a la cola"}
 
 @app.get("/colas/{nombre}/recibir")
-def recibir_de_cola(nombre: str, authorization: str = Header(...)):
-    user = get_user_from_auth(authorization)
-    if not broker.queue_exists(nombre):
-        raise HTTPException(status_code=404, detail="Cola no encontrada")
+def recibir_cola(nombre: str, authorization: Optional[str] = Header(None)):
+    get_username_from_token(authorization)
     mensaje = broker.consume_from_queue(nombre)
-    if mensaje:
-        return {"mensaje": mensaje}
-    else:
-        return {"mensaje": "Cola vacía"}, 204
+    if not mensaje:
+        return {"mensaje": "Cola vacía"}
+    return {"mensaje": mensaje}
+
+# === DATA SIMULADA ===
+
+@app.on_event("startup")
+def startup_event():
+    from mom_nodes.mom1.data_simulation import simulate_data
+    simulate_data()

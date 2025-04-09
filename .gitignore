@@ -1,7 +1,31 @@
+# Entornos virtuales
 venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.DS_Store
+.env
+*.env
 
+# Archivos Python cache
+__pycache__/
+*.py[cod]
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos compilados
+*.so
+*.o
+*.a
+*.out
+
+# Archivos y carpetas temporales
+copiar/
+desde/
+luego/
+opcional,/
+si/
+usas/
+
+# Archivos de pruebas
+*.log
+*.sqlite3
+*.db
