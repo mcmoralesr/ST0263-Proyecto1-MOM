@@ -49,7 +49,7 @@ _(A completar al final del proyecto si queda algo pendiente)_
 
 ---
 
-### 3. Ambiente de Desarrollo
+### 3. Ambiente de desarrollo (local)
 
 #### Tecnologías (nueva versión en Python)
 - Python 3.12
@@ -58,6 +58,7 @@ _(A completar al final del proyecto si queda algo pendiente)_
 - python-jose `[cryptography]`
 - python-multipart
 - grpcio (para comunicación entre MOMs) / grpcio-tools
+- 
 5. Guía rápida de uso
 Cliente obtiene JWT desde el API (otro equipo).
 
@@ -67,25 +68,23 @@ Cliente publica/consume mensajes de colas o tópicos (revistas).
 
 MOM1 replica automáticamente a MOM2 y MOM3 vía gRPC.
 
-
-
-# Setup inicial (una sola vez)
+## Setup inicial (una sola vez)
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# Compilar proto
+## Compilar proto
 python -m grpc_tools.protoc -Igrpc --python_out=grpc --grpc_python_out=grpc grpc/mom.proto
 
-# Levantar API REST (puerto 5000)
+## Levantar API REST (puerto 5000)
 cd api
 python3 app.py
 
-# Levantar MOM1 (puerto 8001)
+## Levantar MOM1 (puerto 8001)
 cd mom_nodes/mom1
 uvicorn mom1_server:app --reload --port 8001
 
-# Levantar MOM2 (puerto 50052)
+## Levantar MOM2 (puerto 50052)
 python3 -m mom_nodes.mom2.grpc_server
 
 # Levantar MOM3 (puerto 50053)
@@ -98,7 +97,7 @@ uvicorn mom_nodes.mom1.mom1_server:app --host 0.0.0.0 --port 8001
 ▶️ Lanzar MOM2:
 python3 -m mom_nodes.mom2.grpc_server
 
-5. Organización de carpetas
+### 5. Organización de carpetas
 
 ST0263-Proyecto1-MOM/
 ├── api/                  # API Flask REST
@@ -109,7 +108,7 @@ ST0263-Proyecto1-MOM/
 ├── grpc/                 # mom.proto + compilados
 
 
-#Referencias
+# Referencias
 - https://fastapi.tiangolo.com
 - https://grpc.io/docs/languages/python/
 - https://flask.palletsprojects.com/
