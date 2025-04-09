@@ -1,4 +1,5 @@
-from mom1.message_broker import broker
+# mom_nodes/mom1/data_simulation.py
+from message_broker import broker
 
 def simulate_data():
     broker.create_queue("Revista_1", description="Revista sobre inteligencia artificial")
@@ -10,12 +11,9 @@ def simulate_data():
     broker.create_topic("Noticias", description="Tópico para noticias recientes")
     broker.create_topic("Charlas", description="Charlas de profesores y expertos")
 
-    broker.publish_to_queue("Revista_1", "Nuevo artículo sobre LLMs")
-    broker.publish_to_queue("Revista_2", "Edición especial sobre visualización de datos")
-    broker.publish_to_topic("Eventos", "Simposio de telecomunicaciones, 15 de abril")
-    broker.publish_to_topic("Convocatorias", "Convocatoria de becas abiertas hasta el 30 de abril")
-    broker.publish_to_topic("Noticias", "Nuevo laboratorio de redes inaugurado")
-    broker.publish_to_topic("Charlas", "Conferencia sobre Web3 y descentralización")
-
-if __name__ == "__main__":
-    simulate_data()
+    broker.send_to_queue("Revista_1", "Nuevo artículo sobre LLMs", user="admin")
+    broker.send_to_queue("Revista_2", "Edición especial sobre visualización de datos", user="admin")
+    broker.publish_to_topic("Eventos", "Simposio de telecomunicaciones, 15 de abril", user="admin")
+    broker.publish_to_topic("Convocatorias", "Convocatoria de becas abiertas hasta el 30 de abril", user="admin")
+    broker.publish_to_topic("Noticias", "Nuevo laboratorio de redes inaugurado", user="admin")
+    broker.publish_to_topic("Charlas", "Conferencia sobre Web3 y descentralización", user="admin")
