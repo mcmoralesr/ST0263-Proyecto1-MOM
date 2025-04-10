@@ -22,7 +22,7 @@ function Login() {
                 localStorage.setItem('token', data.token);
                 console.log('Token guardado:', data.token)
                 setError('');
-                alert('Inicio de sesión exitoso');
+                alert('Registro exitoso');
                 // Aquí puedes redirigir o cargar otra vista
             } else {
                 const errData = await response.json();

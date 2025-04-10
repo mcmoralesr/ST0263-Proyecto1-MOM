@@ -218,7 +218,7 @@ def enviar_mensaje_topico(nombre_topico):
     
     mensaje_id = str(uuid.uuid4())
     mensaje_data = {
-        'id': mensaje_id,
+        'id': mensaje_id,   
         'emisor': current_user,
         'contenido': mensaje,
         'timestamp': datetime.now().isoformat()

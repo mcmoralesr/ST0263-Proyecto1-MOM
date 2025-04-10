@@ -79,29 +79,38 @@ function Magazines({ sendMagazineArray }) {
 
     const handleSendToBackend = async () => {
         const token = localStorage.getItem("token");
+    
         try {
-            const response = await fetch("http://44.221.193.221:5000//api/usuario-topicos", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify({ revistas: selectedMagazines })
-            });
-
-            if (response.ok) {
-                alert("Revistas añadidas correctamente");
-                sendMagazineArray(selectedMagazines);
-                setSelectedMagazines([]);
-                setDropdownOpen(false);
-            } else {
-                const error = await response.json();
-                alert(error.message || "Error al enviar revistas");
-            }
+            // Enviar un POST por cada revista
+            const responses = await Promise.all(
+                selectedMagazines.map(async (magazine) => {
+                    const response = await fetch(`http://44.221.193.221:5000/api/topicos/${encodeURIComponent(magazine)}/suscribir`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+    
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || `Error al suscribirse a '${magazine}'`);
+                    }
+    
+                    return response.json();
+                })
+            );
+    
+            alert("Revistas añadidas correctamente");
+            sendMagazineArray(selectedMagazines);
+            setSelectedMagazines([]);
+            setDropdownOpen(false);
         } catch (err) {
             console.error("Error al enviar revistas:", err);
+            alert(err.message || "Error al enviar revistas");
         }
     };
+    
 
     const sendSingleMagazine = async (nombreTopico) => {
         if (!nombreTopico) {
