@@ -51,6 +51,7 @@ function Login() {
                 console.log('Token guardado:', data.token)
                 setError('');
                 alert('Inicio de sesión exitoso');
+                navigate('/revistas'); // Redirigir a la página de revistas
                 // Aquí puedes redirigir o cargar otra vista
             } else {
                 const errData = await response.json();
