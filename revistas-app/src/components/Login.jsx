@@ -1,14 +1,16 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate(); // Hook for navigation
 
     const handleRegister = async () => {
         try {
-            const response = await fetch('http://44.221.193.221:5000//api/auth/register', {
+            const response = await fetch('http://44.221.193.221:5000/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -16,17 +18,16 @@ function Login() {
                 body: JSON.stringify({ username, password })
             });
 
-
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
-                console.log('Token guardado:', data.token)
+                console.log('Token guardado:', data.token);
                 setError('');
                 alert('Registro exitoso');
-                // Aquí puedes redirigir o cargar otra vista
+                // You can redirect after successful registration if necessary
             } else {
                 const errData = await response.json();
-                setError(errData.error || 'Error en el inicio de sesión');
+                setError(errData.error || 'Error en el registro');
             }
         } catch (err) {
             console.error('Error al conectar con la API:', err);
@@ -36,7 +37,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://44.221.193.221:5000//api/auth/login', {
+            const response = await fetch('http://44.221.193.221:5000/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -44,15 +45,14 @@ function Login() {
                 body: JSON.stringify({ username, password })
             });
 
-
             if (response.ok) {
                 const data = await response.json();
                 localStorage.setItem('token', data.token);
-                console.log('Token guardado:', data.token)
+                console.log('Token guardado:', data.token);
                 setError('');
                 alert('Inicio de sesión exitoso');
-                navigate('/revistas'); // Redirigir a la página de revistas
-                // Aquí puedes redirigir o cargar otra vista
+                // Redirect to the /revistas page upon successful login
+                navigate('/revistas');
             } else {
                 const errData = await response.json();
                 setError(errData.error || 'Error en el inicio de sesión');
@@ -66,7 +66,6 @@ function Login() {
     return (
         <div className="card shadow-lg p-4 w-100" style={{ maxWidth: '400px' }}>
             <h2 className="text-center text-lg mb-4">Inicio de Sesión</h2>
-
 
             <div className="mb-3">
                 <label className="form-label text-secondary">Usuario</label>
@@ -100,8 +99,6 @@ function Login() {
                     Login
                 </button>
             </div>
-
-
         </div>
     );
 }
