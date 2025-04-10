@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function Magazines({ sendMagazineArray }) {
     const [selectedMagazines, setSelectedMagazines] = useState([]);
@@ -102,7 +102,6 @@ function Magazines({ sendMagazineArray }) {
             );
     
             alert("Revistas añadidas correctamente");
-            sendMagazineArray(selectedMagazines);
             setSelectedMagazines([]);
             setDropdownOpen(false);
         } catch (err) {
