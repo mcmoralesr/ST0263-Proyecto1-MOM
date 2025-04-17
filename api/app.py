@@ -23,6 +23,26 @@ colas = {}
 mensajes_topicos = {}
 mensajes_colas = {}
 
+# Creación de tópicos por defecto
+topicos_default = ["CNN", "BBC", "El_tiempo", "Minuto_30"]
+hashed_password =bcrypt.hashpw(b'admin', bcrypt.gensalt())
+usuarios["admin"] = {
+    'password': hashed_password,
+    'topicos_creados': [],
+    'colas_creadas': [],
+    'topicos_suscritos': []
+}
+
+def topicos_por_defecto():
+    for topico in topicos_default:
+        topico_id = str(uuid.uuid4())
+        topicos[topico] = {
+            'id': topico_id,
+            'creador': 'admin',
+            'fecha_creacion': datetime.now().isoformat()
+        }
+        mensajes_topicos[topico] = []
+        usuarios['admin']['topicos_creados'].append(topico)
 
 @app.after_request
 def add_security_headers(response):
@@ -98,7 +118,16 @@ def desuscribir_topico(nombre_topico):
     usuarios[current_user]['topicos_suscritos'].remove(nombre_topico)
     return jsonify({"mensaje": f"Desuscrito del tópico '{nombre_topico}' exitosamente"}), 200
 
-
+# Endpoint para mirar mis tópicos
+@app.route('/api/mis-topicos', methods=['GET'])
+@jwt_required()
+def mis_topicos():
+    current_user = get_jwt_identity()
+    topicos = usuarios[current_user]['topicos_suscritos']
+    
+    return jsonify({
+        "topicos": topicos
+    }), 200
 
 # Endpoints de gestión de tópicos
 @app.route('/api/topicos', methods=['GET'])
@@ -291,6 +320,8 @@ def recibir_mensaje_cola(nombre_cola):
             }), 200
     
     return jsonify({"mensaje": "No hay mensajes pendientes en la cola"}), 204
+
+topicos_por_defecto()
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
