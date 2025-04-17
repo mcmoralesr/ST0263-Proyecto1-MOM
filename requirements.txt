@@ -1,0 +1,24 @@
+# --- Core Web Frameworks ---
+fastapi==0.110.0
+flask==3.0.2
+flask-jwt-extended==4.6.0
+flask-cors==4.0.0
+
+# --- ASGI Server ---
+uvicorn[standard]==0.27.1
+
+# --- Auth ---
+python-jose[cryptography]==3.3.0
+bcrypt==4.1.2
+python-multipart==0.0.9
+
+# --- gRPC ---
+grpcio==1.62.1
+grpcio-tools==1.62.1
+
+# --- Utils ---
+requests==2.31.0
+python-dotenv==1.0.1
+
+# --- Optional tools ---
+aiofiles==23.2.1
