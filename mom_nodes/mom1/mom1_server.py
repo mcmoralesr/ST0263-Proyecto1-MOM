@@ -5,7 +5,7 @@ from typing import Optional
 from jose import JWTError, jwt
 from datetime import datetime
 from mom_nodes.mom1.message_broker import broker
-from mom_nodes.mom1 import grpc_client  # fixed import
+from mom_nodes.mom1 import grpc_client
 
 app = FastAPI()
 
@@ -29,6 +29,20 @@ def get_username_from_token(auth: Optional[str]) -> str:
         return payload.get("sub")
     except JWTError:
         raise HTTPException(status_code=403, detail="Token inválido")
+
+@app.on_event("startup")
+def crear_recursos_por_defecto():
+    # Recursos propios de MOM1
+    if "q1" not in broker.colas:
+        broker.create_queue("q1", description="Cola propia de MOM1")
+    if "t1" not in broker.topicos:
+        broker.create_topic("t1", description="Tópico propio de MOM1")
+    
+    # Réplicas que este nodo mantiene según topología
+    if "q2" not in broker.colas:
+        broker.create_queue("q2", description="Replica de cola MOM2")
+    if "t3" not in broker.topicos:
+        broker.create_topic("t3", description="Replica de tópico MOM3")
 
 @app.get("/topicos")
 def listar_topicos(authorization: Optional[str] = Header(None)):
