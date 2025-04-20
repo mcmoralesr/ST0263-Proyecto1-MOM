@@ -29,3 +29,6 @@ usas/
 *.log
 *.sqlite3
 *.db
+venv/
+__pycache__/
+*.pyc

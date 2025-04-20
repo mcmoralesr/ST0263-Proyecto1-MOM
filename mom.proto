@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+service ReplicationService {
+  rpc ReplicateCreateQueue (QueueRequest) returns (ReplicationReply);
+  rpc ReplicateCreateTopic (TopicRequest) returns (ReplicationReply);
+  rpc ReplicatePublishToQueue (MessageRequest) returns (ReplicationReply);
+  rpc ReplicatePublishToTopic (MessageRequest) returns (ReplicationReply);
+}
+
+message QueueRequest {
+  string queue = 1;
+  string description = 2;
+}
+
+message TopicRequest {
+  string topic = 1;
+  string description = 2;
+}
+
+message MessageRequest {
+  string name = 1;
+  string message = 2;
+}
+
+message ReplicationReply {
+  string status = 1;
+}

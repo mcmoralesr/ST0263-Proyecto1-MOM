@@ -6,7 +6,7 @@ PROJECT_DIR="ST0263-Proyecto1-MOM"
 echo " Lanzando MOM1: REST (8001) + gRPC (50051)..."
 
 # Activar entorno
-cd $PROJECT_DIR || exit
+#cd $PROJECT_DIR || exit
 source venv/bin/activate
 
 # Crear sesión tmux si no existe

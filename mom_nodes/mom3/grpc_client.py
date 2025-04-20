@@ -1,45 +1,52 @@
+# mom_nodes/mom1/grpc_client.py
 import grpc
-import mom_pb2
-import mom_pb2_grpc
+from mom_nodes.mom1 import mom_pb2 as pb, mom_pb2_grpc as pb_grpc
 
-class Replicator:
-    def __init__(self):
-        self.targets = ['52.203.79.134:50051', '52.23.81.232:50052']
+MOM_GRPC_SERVERS = [
+    "54.163.98.1:50051",  # mom3
+    "52.23.81.232:50051",  # mom2
+]
 
-    def replicate_queue(self, name):
-        for target in self.targets:
-            try:
-                with grpc.insecure_channel(target) as channel:
-                    stub = mom_pb2_grpc.MOMReplicatorStub(channel)
-                    stub.CreateQueue(mom_pb2.QueueRequest(name=name))
-            except Exception:
-                pass
+def replicar_crear_topico(nombre, descripcion):
+    for address in MOM_GRPC_SERVERS:
+        try:
+            channel = grpc.insecure_channel(address)
+            stub = pb_grpc.ReplicationServiceStub(channel)
+            request = pb.TopicRequest(topic=nombre, description=descripcion)
+            response = stub.ReplicateCreateTopic(request)
+            print(f"[gRPC] {address} => {response.status}")
+        except grpc.RpcError as e:
+            print(f"[gRPC ERROR] {address}: {e}")
 
-    def replicate_queue_message(self, name, msg):
-        for target in self.targets:
-            try:
-                with grpc.insecure_channel(target) as channel:
-                    stub = mom_pb2_grpc.MOMReplicatorStub(channel)
-                    stub.EnqueueMessage(mom_pb2.QueueMessage(name=name, content=msg))
-            except Exception:
-                pass
+def replicar_crear_cola(nombre, descripcion):
+    for address in MOM_GRPC_SERVERS:
+        try:
+            channel = grpc.insecure_channel(address)
+            stub = pb_grpc.ReplicationServiceStub(channel)
+            request = pb.QueueRequest(queue=nombre, description=descripcion)
+            response = stub.ReplicateCreateQueue(request)
+            print(f"[gRPC] {address} => {response.status}")
+        except grpc.RpcError as e:
+            print(f"[gRPC ERROR] {address}: {e}")
 
-    def replicate_topic(self, name):
-        for target in self.targets:
-            try:
-                with grpc.insecure_channel(target) as channel:
-                    stub = mom_pb2_grpc.MOMReplicatorStub(channel)
-                    stub.CreateTopic(mom_pb2.TopicRequest(name=name))
-            except Exception:
-                pass
+def replicar_publicar_en_topico(nombre, mensaje):
+    for address in MOM_GRPC_SERVERS:
+        try:
+            channel = grpc.insecure_channel(address)
+            stub = pb_grpc.ReplicationServiceStub(channel)
+            request = pb.MessageRequest(name=nombre, message=mensaje)
+            response = stub.ReplicatePublishToTopic(request)
+            print(f"[gRPC] {address} => {response.status}")
+        except grpc.RpcError as e:
+            print(f"[gRPC ERROR] {address}: {e}")
 
-    def replicate_topic_message(self, name, msg):
-        for target in self.targets:
-            try:
-                with grpc.insecure_channel(target) as channel:
-                    stub = mom_pb2_grpc.MOMReplicatorStub(channel)
-                    stub.PublishMessage(mom_pb2.TopicMessage(name=name, content=msg))
-            except Exception:
-                pass
-
-replicator = Replicator()
+def replicar_publicar_en_cola(nombre, mensaje):
+    for address in MOM_GRPC_SERVERS:
+        try:
+            channel = grpc.insecure_channel(address)
+            stub = pb_grpc.ReplicationServiceStub(channel)
+            request = pb.MessageRequest(name=nombre, message=mensaje)
+            response = stub.ReplicatePublishToQueue(request)
+            print(f"[gRPC] {address} => {response.status}")
+        except grpc.RpcError as e:
+            print(f"[gRPC ERROR] {address}: {e}")
