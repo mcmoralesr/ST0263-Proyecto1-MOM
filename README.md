@@ -117,18 +117,26 @@ npm run dev
 | MOM3  | 54.163.98.1      | 50053| 8003 |
 
 
+#### Ejemplo de uso:
+```bash
+curl -X POST http://52.203.79.134:8001/colas -H "Authorization: Bearer <token>" -d '{"nombre": "q_test"}'
+```
+
+
+- **Infraestructura:** AWS EC2 (t2.micro)
+- **Región:** us-east-1
+- **Cada nodo tiene IP elástica asignada.**
+
+
 | Cliente  | IP Pública       |
 |-------|------------------|
 | Login  | 3.229.94.188    | 
 | Revistas  | 3.229.94.188/revistas     |
 
 #### Ejemplo de uso:
-```bash
-curl -X POST http://52.203.79.134:8001/colas -H "Authorization: Bearer <token>" -d '{"nombre": "q_test"}'
-```
+- Al iniciar el ec2, se activa directamente el front
 
 ---
-
 ### 5. Organización del repositorio
 ```
 ST0263-Proyecto1-MOM/
