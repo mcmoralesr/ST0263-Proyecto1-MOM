@@ -43,12 +43,18 @@ Diseñamos e implementamos un Middleware Orientado a Mensajes (MOM) que permite 
 - Cliente se conecta por REST a un API central que reenvía a MOM1.
 - MOM1 replica a MOM2 y MOM3 mediante gRPC.
 - Cada nodo tiene su propio broker y lógica de publicación/consumo.
+- Cliente esta integradno con apache dentro del servidor para que funcione tambien con un balanceador de carga.
 
 ```
 [ CLIENTE ] ← REST → [ API Flask ] ← REST → [ MOM1 ] ↔ gRPC ↔ [ MOM2 ] ↔ gRPC ↔ [ MOM3 ]
 ```
-
 ---
+#### Como se usa el cliente
+- Registrar el usuario
+- Login del usuario
+- Visualizar las revistas disponibles
+- Añadir revivstas seleccionadas
+- Visualizar las revistas de ese usuario
 
 ### 3. Ambiente de desarrollo (local)
 
@@ -59,6 +65,7 @@ Diseñamos e implementamos un Middleware Orientado a Mensajes (MOM) que permite 
   - grpcio-tools 1.62
   - fastapi 0.110 (en pruebas)
   - python-jose, bcrypt, python-multipart, etc.
+  - React vite
 - **Protocolo:** gRPC para replicación
 
 #### Instalación:
@@ -89,6 +96,11 @@ python3 -m mom_nodes.mom2.grpc_server
 ```bash
 python3 -m mom_nodes.mom3.grpc_server
 ```
+**MOM4:**
+```bash
+npm install
+npm run dev
+```
 
 ---
 
@@ -103,6 +115,12 @@ python3 -m mom_nodes.mom3.grpc_server
 | MOM1  | 52.203.79.134    | 50051| 8001 |
 | MOM2  | 52.23.81.232     | 50052| 8002 |
 | MOM3  | 54.163.98.1      | 50053| 8003 |
+
+
+| Cliente  | IP Pública       |
+|-------|------------------|
+| Login  | 3.229.94.188    | 
+| Revistas  | 3.229.94.188/revistas     |
 
 #### Ejemplo de uso:
 ```bash
