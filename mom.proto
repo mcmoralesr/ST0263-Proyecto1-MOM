@@ -7,21 +7,55 @@ service ReplicationService {
   rpc ReplicatePublishToTopic (MessageRequest) returns (ReplicationReply);
 }
 
+// Api rest con el Mom
+service MomService {
+  rpc CreateQueue (QueueRequest) returns (ReplicationReply);
+  rpc CreateTopic (TopicRequest) returns (ReplicationReply);
+  rpc DeleteTopic (TopicRequest) returns (OperationResponse);
+  rpc PublishToQueue (MessageRequest) returns (ReplicationReply);
+  rpc PublishToTopic (MessageRequest) returns (ReplicationReply);
+  rpc SubscribeToTopic (SubscriptionRequest) returns (OperationResponse);
+  rpc UnsubscribeFromTopic (SubscriptionRequest) returns (OperationResponse);
+  rpc GetUserSubscriptions (UserRequest) returns (SubscriptionListResponse);
+}
+
 message QueueRequest {
   string queue = 1;
   string description = 2;
+  string user = 3; 
 }
 
 message TopicRequest {
   string topic = 1;
   string description = 2;
+  string user = 3; 
 }
 
 message MessageRequest {
-  string name = 1;
+  string name = 1;  
   string message = 2;
+  string user = 3; 
 }
 
 message ReplicationReply {
   string status = 1;
+  string error = 2; 
+}
+
+message UserRequest {
+  string user = 1;
+}
+
+message SubscriptionListResponse {
+  repeated string topics = 1;
+}
+
+message SubscriptionRequest {
+  string topic = 1;
+  string user = 2;
+}
+
+message OperationResponse {
+  bool success = 1;
+  string message = 2; 
 }

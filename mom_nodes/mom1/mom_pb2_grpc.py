@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from mom_nodes.mom1 import mom_pb2 as mom__pb2
+import mom_pb2 as mom__pb2
 
 
 class ReplicationServiceStub(object):
@@ -161,5 +161,300 @@ class ReplicationService(object):
         return grpc.experimental.unary_unary(request, target, '/ReplicationService/ReplicatePublishToTopic',
             mom__pb2.MessageRequest.SerializeToString,
             mom__pb2.ReplicationReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class MomServiceStub(object):
+    """Api rest con el Mom
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.CreateQueue = channel.unary_unary(
+                '/MomService/CreateQueue',
+                request_serializer=mom__pb2.QueueRequest.SerializeToString,
+                response_deserializer=mom__pb2.ReplicationReply.FromString,
+                )
+        self.CreateTopic = channel.unary_unary(
+                '/MomService/CreateTopic',
+                request_serializer=mom__pb2.TopicRequest.SerializeToString,
+                response_deserializer=mom__pb2.ReplicationReply.FromString,
+                )
+        self.DeleteTopic = channel.unary_unary(
+                '/MomService/DeleteTopic',
+                request_serializer=mom__pb2.TopicRequest.SerializeToString,
+                response_deserializer=mom__pb2.OperationResponse.FromString,
+                )
+        self.PublishToQueue = channel.unary_unary(
+                '/MomService/PublishToQueue',
+                request_serializer=mom__pb2.MessageRequest.SerializeToString,
+                response_deserializer=mom__pb2.ReplicationReply.FromString,
+                )
+        self.PublishToTopic = channel.unary_unary(
+                '/MomService/PublishToTopic',
+                request_serializer=mom__pb2.MessageRequest.SerializeToString,
+                response_deserializer=mom__pb2.ReplicationReply.FromString,
+                )
+        self.SubscribeToTopic = channel.unary_unary(
+                '/MomService/SubscribeToTopic',
+                request_serializer=mom__pb2.SubscriptionRequest.SerializeToString,
+                response_deserializer=mom__pb2.OperationResponse.FromString,
+                )
+        self.UnsubscribeFromTopic = channel.unary_unary(
+                '/MomService/UnsubscribeFromTopic',
+                request_serializer=mom__pb2.SubscriptionRequest.SerializeToString,
+                response_deserializer=mom__pb2.OperationResponse.FromString,
+                )
+        self.GetUserSubscriptions = channel.unary_unary(
+                '/MomService/GetUserSubscriptions',
+                request_serializer=mom__pb2.UserRequest.SerializeToString,
+                response_deserializer=mom__pb2.SubscriptionListResponse.FromString,
+                )
+
+
+class MomServiceServicer(object):
+    """Api rest con el Mom
+    """
+
+    def CreateQueue(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CreateTopic(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteTopic(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PublishToQueue(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PublishToTopic(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubscribeToTopic(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UnsubscribeFromTopic(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetUserSubscriptions(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MomServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'CreateQueue': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateQueue,
+                    request_deserializer=mom__pb2.QueueRequest.FromString,
+                    response_serializer=mom__pb2.ReplicationReply.SerializeToString,
+            ),
+            'CreateTopic': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateTopic,
+                    request_deserializer=mom__pb2.TopicRequest.FromString,
+                    response_serializer=mom__pb2.ReplicationReply.SerializeToString,
+            ),
+            'DeleteTopic': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteTopic,
+                    request_deserializer=mom__pb2.TopicRequest.FromString,
+                    response_serializer=mom__pb2.OperationResponse.SerializeToString,
+            ),
+            'PublishToQueue': grpc.unary_unary_rpc_method_handler(
+                    servicer.PublishToQueue,
+                    request_deserializer=mom__pb2.MessageRequest.FromString,
+                    response_serializer=mom__pb2.ReplicationReply.SerializeToString,
+            ),
+            'PublishToTopic': grpc.unary_unary_rpc_method_handler(
+                    servicer.PublishToTopic,
+                    request_deserializer=mom__pb2.MessageRequest.FromString,
+                    response_serializer=mom__pb2.ReplicationReply.SerializeToString,
+            ),
+            'SubscribeToTopic': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubscribeToTopic,
+                    request_deserializer=mom__pb2.SubscriptionRequest.FromString,
+                    response_serializer=mom__pb2.OperationResponse.SerializeToString,
+            ),
+            'UnsubscribeFromTopic': grpc.unary_unary_rpc_method_handler(
+                    servicer.UnsubscribeFromTopic,
+                    request_deserializer=mom__pb2.SubscriptionRequest.FromString,
+                    response_serializer=mom__pb2.OperationResponse.SerializeToString,
+            ),
+            'GetUserSubscriptions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUserSubscriptions,
+                    request_deserializer=mom__pb2.UserRequest.FromString,
+                    response_serializer=mom__pb2.SubscriptionListResponse.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'MomService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class MomService(object):
+    """Api rest con el Mom
+    """
+
+    @staticmethod
+    def CreateQueue(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/CreateQueue',
+            mom__pb2.QueueRequest.SerializeToString,
+            mom__pb2.ReplicationReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def CreateTopic(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/CreateTopic',
+            mom__pb2.TopicRequest.SerializeToString,
+            mom__pb2.ReplicationReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DeleteTopic(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/DeleteTopic',
+            mom__pb2.TopicRequest.SerializeToString,
+            mom__pb2.OperationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PublishToQueue(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/PublishToQueue',
+            mom__pb2.MessageRequest.SerializeToString,
+            mom__pb2.ReplicationReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def PublishToTopic(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/PublishToTopic',
+            mom__pb2.MessageRequest.SerializeToString,
+            mom__pb2.ReplicationReply.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubscribeToTopic(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/SubscribeToTopic',
+            mom__pb2.SubscriptionRequest.SerializeToString,
+            mom__pb2.OperationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UnsubscribeFromTopic(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/UnsubscribeFromTopic',
+            mom__pb2.SubscriptionRequest.SerializeToString,
+            mom__pb2.OperationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetUserSubscriptions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/MomService/GetUserSubscriptions',
+            mom__pb2.UserRequest.SerializeToString,
+            mom__pb2.SubscriptionListResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
