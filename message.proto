@@ -1,0 +1,79 @@
+syntax = "proto3";
+package message;
+
+service ReplicationService {
+  rpc ReplicateCreateQueue (QueueRequest) returns (ReplicationReply);
+  rpc ReplicateCreateTopic (TopicRequest) returns (ReplicationReply);
+  rpc ReplicatePublishToQueue (MessageRequest) returns (ReplicationReply);
+  rpc ReplicatePublishToTopic (MessageRequest) returns (ReplicationReply);
+}
+
+service MomService {
+  rpc CreateTopic (TopicRequest) returns (OperationResponse);
+  rpc DeleteTopic (TopicRequest) returns (OperationResponse);
+  rpc ListTopics (UserRequest) returns (TopicListResponse);
+  rpc SubscribeToTopic (SubscriptionRequest) returns (OperationResponse);
+  rpc UnsubscribeFromTopic (SubscriptionRequest) returns (OperationResponse);
+  rpc GetUserSubscriptions (UserRequest) returns (SubscriptionListResponse);
+  rpc CreateQueue (QueueRequest) returns (OperationResponse);
+  rpc DeleteQueue (QueueRequest) returns (OperationResponse);
+  rpc ListQueues (UserRequest) returns (QueueListResponse);
+  rpc PublishToTopic (MessageRequest) returns (OperationResponse);
+  rpc PublishToQueue (MessageRequest) returns (OperationResponse);
+  rpc ReceiveFromQueue (MessageRequest) returns (MessageResponse);
+  rpc ReceiveFromTopicSubscription (SubscriptionRequest) returns (MessageResponse);
+}
+
+message QueueRequest {
+  string name = 1;
+  string user = 2;
+}
+
+message TopicRequest {
+  string name = 1;
+  string user = 2;
+}
+
+message MessageRequest {
+  string name = 1;
+  string message = 2;
+  string user = 3;
+}
+
+message SubscriptionRequest {
+  string topic = 1;
+  string user = 2;
+}
+
+message UserRequest {
+  string user = 1;
+}
+
+message TopicListResponse {
+  repeated string topics = 1;
+}
+
+message QueueListResponse {
+  repeated string queues = 1;
+}
+
+message SubscriptionListResponse {
+  repeated string topics = 1;
+}
+
+message OperationResponse {
+  string status = 1;
+  string message = 2;
+}
+
+message MessageResponse {
+  string status = 1;
+  string message = 2;
+  string message_id = 3;
+  string error = 4;
+}
+
+message ReplicationReply {
+  string status = 1;
+  string error = 2;
+}
