@@ -10,7 +10,7 @@ function Login() {
 
     const handleRegister = async () => {
         try {
-            const response = await fetch('http://44.221.193.221:5000/api/auth/register', {
+            const response = await fetch('http://54.156.65.242:5000/api/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,7 +37,7 @@ function Login() {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('http://44.221.193.221:5000/api/auth/login', {
+            const response = await fetch('http://54.156.65.242:5000/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
